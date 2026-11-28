@@ -1,10 +1,30 @@
 from django.urls import path
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from users.apps import UsersConfig
-from users.views import UserRetrieveUpdateAPIView, PaymentListAPIView
+from users.views import (
+    UserCreateAPIView,
+    UserListAPIView,
+    UserRetrieveAPIView,
+    UserUpdateAPIView,
+    UserDestroyAPIView,
+    PaymentListAPIView,
+)
 
 app_name = UsersConfig.name
 
 urlpatterns = [
-    path('users/<int:pk>/', UserRetrieveUpdateAPIView.as_view(), name='user-update'),
+    # Регистрация и JWT-токены (доступны всем)
+    path('register/', UserCreateAPIView.as_view(), name='register'),
+    path('login/', TokenObtainPairView.as_view(permission_classes=(AllowAny,)), name='login'),
+    path('token/refresh/', TokenRefreshView.as_view(permission_classes=(AllowAny,)), name='token_refresh'),
+
+    # CRUD пользователей
+    path('users/', UserListAPIView.as_view(), name='user-list'),
+    path('users/<int:pk>/', UserRetrieveAPIView.as_view(), name='user-get'),
+    path('users/update/<int:pk>/', UserUpdateAPIView.as_view(), name='user-update'),
+    path('users/delete/<int:pk>/', UserDestroyAPIView.as_view(), name='user-delete'),
+
+    # Платежи
     path('payments/', PaymentListAPIView.as_view(), name='payment-list'),
 ]
